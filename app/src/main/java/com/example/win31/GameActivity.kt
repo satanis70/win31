@@ -1,19 +1,23 @@
 package com.example.win31
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.win31.api.Api
 import com.example.win31.model.Country
 import com.example.win31.model.Image
+import com.onesignal.OneSignal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,9 +30,9 @@ class GameActivity : AppCompatActivity() {
 
     var listImages = ArrayList<Image>()
     var listWords = ArrayList<Country>()
-    var currentScore = 0
-    var currentWord: CharArray? = null
-    var arrayList: ArrayList<String> = ArrayList()
+    var currentMistakes= 0
+    var currentWordList: ArrayList<String> = ArrayList()
+    var currentName: ArrayList<Char>? = null
     var a: Button? = null
     var b: Button? = null
     var c: Button? = null
@@ -60,6 +64,9 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+        OneSignal.setLogLevel(OneSignal.LOG_LEVEL.VERBOSE, OneSignal.LOG_LEVEL.NONE)
+        OneSignal.initWithContext(this)
+        OneSignal.setAppId("714b9f14-381d-4fc4-a93c-28d480557381")
         val layout = findViewById<ConstraintLayout>(R.id.activity_game_layout)
         Glide.with(this).load("http://49.12.202.175/win31/phoneimg.png")
             .into(object : SimpleTarget<Drawable?>() {
@@ -72,6 +79,11 @@ class GameActivity : AppCompatActivity() {
             })
         tvWord = findViewById(R.id.text_view_word)
         getImages()
+
+        findViewById<Button>(R.id.button_again).setOnClickListener {
+            startActivity(Intent(this, GameActivity::class.java))
+            finish()
+        }
     }
 
     private fun getImages() {
@@ -107,21 +119,20 @@ class GameActivity : AppCompatActivity() {
             }
             launch(Dispatchers.Main) {
                 listWords.shuffle()
-                val name = listWords[0].name
-                currentWord = name.toCharArray()
-                for (i in currentWord!!){
-                    arrayList.add(i.toString())
+                currentName = listWords[0].name.toList() as ArrayList<Char>
+                for (i in currentName!!.indices){
+                    currentWordList.add(currentName!![i].toString().lowercase())
+                    currentName!![i]='*'
                 }
-                stars = arrayList[0].padEnd(name.length, '*')
-                tvWord?.text = stars
-                initButton(stars!!)
+                tvWord?.text = currentName!!.joinToString()
+                initButton(currentWordList)
             }
         }
     }
 
     private fun load() {
         val imageView = findViewById<ImageView>(R.id.imageView)
-        Glide.with(this).load(listImages[currentScore].img)
+        Glide.with(this).load(listImages[currentMistakes].img)
             .into(object : SimpleTarget<Drawable?>() {
                 override fun onResourceReady(
                     resource: Drawable,
@@ -132,8 +143,8 @@ class GameActivity : AppCompatActivity() {
             })
     }
 
-    fun initButton(stars: String) {
-        Log.i("arrayList", arrayList.toString())
+    fun initButton(currentWordList: ArrayList<String>) {
+        Log.i("arrayList", currentWordList.toString())
         a = findViewById(R.id.a)
         b = findViewById(R.id.b)
         c = findViewById(R.id.c)
@@ -161,15 +172,148 @@ class GameActivity : AppCompatActivity() {
         y = findViewById(R.id.y)
         z = findViewById(R.id.z)
         a?.setOnClickListener {
-            tvWord = findViewById(R.id.text_view_word)
-            val str = stars.replace(stars[1], 'a')
-            for (i in arrayList.indices){
-                Log.i("for", stars)
-                if(arrayList[i]=="a"){
-                    Log.i("stars", str)
-                    tvWord?.text = str
-                }
-            }
+            check('a', a!!)
         }
+        b?.setOnClickListener {
+            check('b', b!!)
+        }
+        c?.setOnClickListener {
+            check('c', c!!)
+        }
+        d?.setOnClickListener {
+            check('d', d!!)
+        }
+        e?.setOnClickListener {
+            check('e', e!!)
+        }
+        f?.setOnClickListener {
+            check('f', f!!)
+        }
+        g?.setOnClickListener {
+            check('g', g!!)
+        }
+        h?.setOnClickListener {
+            check('h', h!!)
+        }
+        i?.setOnClickListener {
+            check('i', i!!)
+        }
+        j?.setOnClickListener {
+            check('j', j!!)
+        }
+        k?.setOnClickListener {
+            check('k', k!!)
+        }
+        l?.setOnClickListener {
+            check('l', l!!)
+        }
+        m?.setOnClickListener {
+            check('m', m!!)
+        }
+        n?.setOnClickListener {
+            check('n', n!!)
+        }
+        o?.setOnClickListener {
+            check('o', o!!)
+        }
+        p?.setOnClickListener {
+            check('p', p!!)
+        }
+        q?.setOnClickListener {
+            check('q', q!!)
+        }
+        r?.setOnClickListener {
+            check('r', r!!)
+        }
+        s?.setOnClickListener {
+            check('s', s!!)
+        }
+        t?.setOnClickListener {
+            check('t', t!!)
+        }
+        u?.setOnClickListener {
+            check('u', u!!)
+        }
+        v?.setOnClickListener {
+            check('v', v!!)
+        }
+        w?.setOnClickListener {
+            check('w', w!!)
+        }
+        x?.setOnClickListener {
+            check('x', x!!)
+        }
+        y?.setOnClickListener {
+            check('y', y!!)
+        }
+        z?.setOnClickListener {
+            check('z', z!!)
+        }
+    }
+
+    private fun check(value: Char, button: Button) {
+        val textViewWinLos = findViewById<TextView>(R.id.textView_winlos)
+        Log.i("currentMistakes", currentMistakes.toString())
+        if (currentMistakes==7){
+            textViewWinLos?.setTextColor(resources.getColor(R.color.red))
+            textViewWinLos.text = resources.getText(R.string.loss)
+            disableButtons()
+        } else if(!currentName!!.contains('*')){
+            textViewWinLos?.setTextColor(resources.getColor(R.color.green))
+            textViewWinLos.text = resources.getText(R.string.win)
+            disableButtons()
+        } else {
+            if (currentWordList.contains(value.toString())){
+                for(i in currentWordList.indices){
+                    if (currentWordList[i]==value.toString()){
+                        currentName!![i]=value
+                    }
+                }
+                if(!currentName!!.contains('*')){
+                    textViewWinLos?.setTextColor(resources.getColor(R.color.green))
+                    textViewWinLos.text = resources.getText(R.string.win)
+                    disableButtons()
+                }
+            } else {
+                currentMistakes+=1
+                if (currentMistakes==7){
+                    textViewWinLos?.setTextColor(resources.getColor(R.color.red))
+                    textViewWinLos.text = resources.getText(R.string.loss)
+                    disableButtons()
+                }
+                load()
+            }
+            button.visibility = View.INVISIBLE
+            tvWord?.text = currentName?.joinToString()
+        }
+    }
+
+    private fun disableButtons(){
+        a?.isEnabled = false
+        b?.isEnabled = false
+        c?.isEnabled = false
+        d?.isEnabled = false
+        e?.isEnabled = false
+        f?.isEnabled = false
+        g?.isEnabled = false
+        h?.isEnabled = false
+        i?.isEnabled = false
+        j?.isEnabled = false
+        k?.isEnabled = false
+        l?.isEnabled = false
+        m?.isEnabled = false
+        n?.isEnabled = false
+        o?.isEnabled = false
+        p?.isEnabled = false
+        q?.isEnabled = false
+        r?.isEnabled = false
+        s?.isEnabled = false
+        t?.isEnabled = false
+        u?.isEnabled = false
+        v?.isEnabled = false
+        w?.isEnabled = false
+        x?.isEnabled = false
+        y?.isEnabled = false
+        z?.isEnabled = false
     }
 }

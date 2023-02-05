@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="start_game">Start Game</string>
+    <string name="win">You Win!</string>
+    <string name="loss">You Loss!</string>
 </resources>
